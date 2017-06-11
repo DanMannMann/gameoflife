@@ -42,7 +42,7 @@ export class Board extends React.Component {
         if (this.state.running) {
             clearInterval(this.state.intervalId);
         } else {
-            setTimeout(this.tick, 50);
+            setTimeout(this.tick, this.state.DELAY);
         }
 
         this.state.running = !this.state.running;
