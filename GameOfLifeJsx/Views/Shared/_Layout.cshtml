@@ -1,0 +1,28 @@
+﻿@inject Microsoft.ApplicationInsights.AspNetCore.JavaScriptSnippet JavaScriptSnippet
+@{ IgnoreBody(); }
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - GameOfLifeJsx</title>
+
+    <environment names="Development">
+        
+    </environment>
+    <environment names="Staging,Production">
+        
+    </environment>
+    @Html.Raw(JavaScriptSnippet.FullScript)
+</head>
+<body width="100%">
+	<div id="root"></div>
+
+    <environment names="Development">
+        <script src="~/js/app.js" asp-append-version="true"></script>
+    </environment>
+    <environment names="Staging,Production">
+		<script src="~/js/app.js" asp-append-version="true"></script>
+    </environment>
+</body>
+</html>
