@@ -24,18 +24,20 @@ export class Board extends React.Component {
         this.deadRules = this.deadRules.bind(this);
         this.speedChange = this.speedChange.bind(this);
 
-        this.state = { rows: [], running: false };
-        this.state.DELAY = DELAY;
+        this.state = { rows: this.getDefaultRows(), running: false, DELAY: DELAY };
+    }
 
+    newMethod() {
+        var rows = [];
         let d2 = (DIMENSION / 2);
         for (var x = 0; x < DIMENSION; x++) {
             var cells = [];
-            this.state.rows[x] = cells;
+            rows[x] = cells;
             for (var y = 0; y < DIMENSION; y++) {
-                cells[y] = { alive: (x > d2 - 3 && x < d2 + 3 && y == d2) || (y > d2 - 2 && y < d2 + 2 && (x == d2 - 3 || x == d2 + 3)), element: null, x: x, y: y }
+                cells[y] = { alive: (x > d2 - 3 && x < d2 + 3 && y == d2) || (y > d2 - 2 && y < d2 + 2 && (x == d2 - 3 || x == d2 + 3)), element: null, x: x, y: y };
             }
-
         }
+        return rows;
     }
 
     toggle() {
@@ -44,9 +46,8 @@ export class Board extends React.Component {
         } else {
             setTimeout(this.tick, this.state.DELAY);
         }
-
-        this.state.running = !this.state.running;
-        this.setState(this.state);
+        
+        this.setState({ running: !this.state.running });
     }
 
     tick() {
@@ -61,9 +62,7 @@ export class Board extends React.Component {
                 }
             }
         }
-        this.state.rows = newRows;
-        this.setState(this.state);
-        this.state.intervalId = setTimeout(this.tick, this.state.DELAY);
+        this.setState({ rows: newRows, intervalId: setTimeout(this.tick, this.state.DELAY) });
     }
 
     livingRules(model, newState) {
@@ -74,7 +73,8 @@ export class Board extends React.Component {
                 ct++;
             }
         }
-        newState[model.x][model.y] = { alive: ct == 2 || ct == 3, element: null, x: model.x, y: model.y };
+        var isAlive = ct == 2 || ct == 3;
+        newState[model.x][model.y] = isAlive === model.alive ? model : { alive: isAlive, element: null, x: model.x, y: model.y };
     }
 
     deadRules(model, newState) {
@@ -85,7 +85,8 @@ export class Board extends React.Component {
                 ct++;
             }
         }
-        newState[model.x][model.y] = { alive: ct == 3, element: null, x: model.x, y: model.y };
+        var isAlive = ct == 3;
+        newState[model.x][model.y] = isAlive === model.alive ? model : { alive: isAlive, element: null, x: model.x, y: model.y };
     }
 
     getNeighbours(model) {
@@ -131,17 +132,11 @@ export class Board extends React.Component {
     }
 
     clear() {
-        for (var col in this.state.rows) {
-            for (var cell in this.state.rows[col]) {
-                this.state.rows[col][cell].alive = false;
-            }
-        }
-        this.setState(this.state);
+        this.setState({ rows: this.getDefaultRows() });
     }
 
     speedChange(e) {
-        this.state.DELAY = e.target.value;
-        this.setState(this.state);
+        this.setState({ DELAY: e.target.value });
     }
 
     render() {
@@ -180,8 +175,11 @@ export class Board extends React.Component {
     }
 
     onClick(e, model) {
+        // This is kinda hacky, but it's much less verbose than trying to 
+        // slot in a single new cell model at the right place using immutability helper.
+        // Loss of efficiency in state comparisons is limited since this only happens
+        // in response to occasional user input.
         model.alive = !model.alive;
         this.setState(this.state);
-        //this.setState(update(this.state, { rows: { [model.x]: { [model.y]: { $set: { alive: !model.alive, element: null, x: model.x, y: model.y } } } } }));
     }
 }
